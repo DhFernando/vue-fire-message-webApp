@@ -1,26 +1,31 @@
 <template>
   <div id="">
-    <div class="row ml-1 mt-5">
-      <div class="row">
-        <div class="col-8">
-          <h5>Chat Menue</h5>
-        </div>
-        <div class="col-4">
-          <div class="row">
-            <div class="col-6">
-              <button type="button" id='newChat' class="btn" data-toggle="modal" data-target="#exampleModal1"><img style='height:30px' src="../assets/new-user.png" alt=""></button>
-            </div>
-            <div class="col-6">
-              <button type="button" v-on:click='displayRequestList()' id='newChat' class="btn" data-toggle="modal" data-target="#exampleModal2"><img style='height:30px' src="../assets/friendship.png" alt=""></button>
+    <div class="row pl-0 pt-3 pb-2 mb-3 bg-dark">
+      <div class="col-12">
+        <div class="row">
+          <div class="col-4 text-light ">
+            <h5>Chat Menue</h5>
+          </div>
+          <div class="col-8">
+            <div class="row">
+              <div class="col-3">
+                <button type="button" id='newChat' class="btn pt-0" data-toggle="modal" data-target="#exampleModal1"><img style='height:30px' src="../assets/new-user.png" alt=""></button>
+              </div>
+              <div class="col-3">
+                <button type="button" v-on:click='displayRequestList()' id='newChat' class="btn pt-0 mt-0 " data-toggle="modal" data-target="#exampleModal2"><img style='height:30px' src="../assets/friendship.png" alt=""></button>
+              </div>
+              <div class="col-3">
+
+              </div>
+              <div class="col-3">
+                <button type="button" class="btn pt-0 float-right" data-toggle="modal" data-target="#exampleModal"> <img style='height:30px' src="../assets/repairing-service.png" alt=""></button>
+              </div>
             </div>
           </div>
-
         </div>
       </div>
     </div>
-    <div class="row ml-1">
-          <h6>Your Groups</h6>
-    </div>
+
     <div class="row">
       <div class="container">
             <div class="row">
@@ -70,13 +75,13 @@ export default {
   },
   data (){
     return{
-      allGroupChats:[],
-      allPersonalChats:[],
+      allGroupChats:[], // all groups which has access
+      allPersonalChats:[], // all personal chats which has access
     }
   },
   methods:{
     chat : function(chat){
-      this.$store.commit('selectedChat',chat)
+      this.$store.commit('chat',chat)
       this.$store.commit('fbMessages')
     },
     displayRequestList:function(){
@@ -87,21 +92,23 @@ export default {
 
   },
   created:function(){
-//create tempNameholder variable tempary for hold
-    let tempuid = this.$store.getters.user.uid
-    let tempAllGroupChats = []
-    let tempAllPersonalChats = []
-    fb.firestore().collection("chats")
+// get all the chats(chats->personal/group) which user has access(permission)
+
+    let tempuid = this.$store.getters.user.uid // tempid use for store user id tempary for check permission
+    let tempAllGroupChats = [] // for store allgroup chats which has access
+    let tempAllPersonalChats = [] // for store allgroup personal which has access
+
+    fb.firestore().collection("chats") // query for getting all chats which has permission
     .onSnapshot(function(snapshot) {
         snapshot.docChanges().forEach(function(change) {
-            if (change.type === "added" && change.doc.data().chatType=='group') {
+            if (change.type === "added" && change.doc.data().chatType == 'group') {
               tempAllGroupChats.push({name : change.doc.data().name , id : change.doc.id,chatType : change.doc.data().chatType})
-            }else if(change.type === "added" && change.doc.data().chatType=='personal'){
+            }else if(change.type === "added" && change.doc.data().chatType == 'personal'){
               if(change.doc.data().owners.owner01.id == tempuid){
                 tempAllPersonalChats.push({
                   name :change.doc.data().owners.owner02.name ,
                   id : change.doc.id,
-                  phoneNumber : change.doc.data().owners.owner02.phoneNum,
+                  phoneNumber : change.doc.data().owners.owner02.phoneNumber,
                   email : change.doc.data().owners.owner02.email,
                   chatType : change.doc.data().chatType
                 })
@@ -109,7 +116,7 @@ export default {
                 tempAllPersonalChats.push({
                   name :change.doc.data().owners.owner01.name ,
                   id : change.doc.id,
-                  phoneNumber : change.doc.data().owners.owner01.phoneNum,
+                  phoneNumber : change.doc.data().owners.owner01.phoneNumber,
                   email : change.doc.data().owners.owner01.email,
                   chatType : change.doc.data().chatType
                 })

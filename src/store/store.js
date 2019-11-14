@@ -7,21 +7,24 @@ Vue.use(Vuex)
 
 export const store = new Vuex.Store({
     state:{
-       user : {
-         uid:'',
-         email:'',
-         name:'',
-         phoneNumber:''
+       user : { // logged user informaiton
+         uid:'', //user id
+         email:'', //user email
+         name:'', // user name
+         phoneNumber:'' //user phone number
        },
-       chat:'',
-       fbMessages:[],
-       chats:[],
+       chat:'', // selected chat information
+       fbMessages:[], //store selected chat's messages data as a array (include : messageId,senderDetails,time,)
        exsistAllUserIds:[],
        requestList:[],
-      
+       routerTo:{
+              login:true,
+              register:false
+            }
+
     },
     getters:{
-      currentChat:(state)=>{
+      chat:(state)=>{
         return state.chat
       },
       fbMessages:(state)=>{
@@ -33,8 +36,8 @@ export const store = new Vuex.Store({
       user:(state)=>{
           return state.user
       },
-      meassage:(state)=>{
-        return state.message
+      routerTo:(state)=>{
+        return state.routerTo
       }
 
     },
@@ -42,26 +45,37 @@ export const store = new Vuex.Store({
 
     },
     mutations:{
-      selectedChat:(state,chat)=>{
-        state.fbMessages=[]
-        state.chat = chat
+      chat:(state,chat)=>{   // from chatMenue.vue for find  which chat is seleced by user form chat list (personal/group)
+        state.fbMessages=[] // clear previous chat message data (id,message and  ext ..)
+        state.chat = chat // parse selected chat information to the vuex state (now vuex is updated)
       },
-      fbMessages:(state)=>{
+      fbMessages:(state)=>{  // push chat message data to vuex fbMessages array
           fb.firestore().collection('chats').doc(state.chat.id).collection('message').orderBy('time').onSnapshot(snapshot=>{
             var changes = snapshot.docChanges();
             changes.forEach(change=>{
               if(change.type == 'added'){
-                state.fbMessages.push(change.doc.data())
+                state.fbMessages.push({messageId:change.doc.id, details:change.doc.data()})
+              }else if(change.type == 'modified'){
+                state.fbMessages[change.doc.data().messageIndex].details.message= 'this message has been deleted'
               }
             })
           })
         },
-      send:(state,{currentChat,message})=>{
+      deleteMessage:(state,{messageId,index})=>{
+        fb.firestore().collection("chats").doc(state.chat.id).collection('message').doc(messageId).update({
+            message: 'this message has been deleted',
+            deletedMessage:state.fbMessages[index].details.message,
+            deleted:true,
+            messageIndex:index
+        })
+      },
+      send:(state,{currentChat,message})=>{ // send message details to firebase
         fb.firestore().collection("chats").doc(currentChat).collection('message').add({
             message:message,
             time:new Date(),
             uid:state.user.uid,
-            name:state.user.name
+            name:state.user.name,
+            deleted:false
         })
       },
       createGroup:(state,newChat)=>{
@@ -127,19 +141,19 @@ export const store = new Vuex.Store({
                 fb.firestore().collection("chats").doc().set({
                     chatType : 'personal',
                     owners : {
-                                owner01:{
-                                  id:requesterData.requesterId,
-                                  name:requesterData.requesterName,
-                                  email:requesterData.requesterEmail,
-                                  phoneNumber:requesterData.requesterPhoneNumber
-                                },
-                                owner02:{
-                                  id:state.user.uid,
-                                  name:state.user.name,
-                                  email:state.user.email,
-                                  phoneNumber:state.user.phoneNumber
-                                }
+                              owner01:{
+                                id:requesterData.requesterId,
+                                name:requesterData.requesterName,
+                                email:requesterData.requesterEmail,
+                                phoneNumber:requesterData.requesterPhoneNumber
                               },
+                              owner02:{
+                                id:state.user.uid,
+                                name:state.user.name,
+                                email:state.user.email,
+                                phoneNumber:state.user.phoneNumber
+                              }
+                            },
 
                   })
               }).then(()=>{
@@ -151,6 +165,10 @@ export const store = new Vuex.Store({
               })
 
 
+      },
+      routerTo:(state)=>{
+        state.routerTo.login = !state.routerTo.login
+        state.routerTo.register =!state.routerTo.register
       }
 
     }

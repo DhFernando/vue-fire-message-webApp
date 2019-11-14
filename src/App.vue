@@ -1,20 +1,38 @@
 <template>
-  <div class='row ml-0 mr-0 mt-3 container-fluid' id="app">
-    <div class="col-6 border pl-5 pb-5" v-if='!status'>
-      <chatLogIn/>
-    </div>
-    <div class="col-6 border pl-5 pb-5" v-if='!status'>
-        <chatRegistration/>
-    </div>
-    <div class="col-12  pl-1" v-if='status'>
-        <div class="row">
-          <div class="col-4 border">
-            <chatMenue/>
-          </div>
-          <div class="col-8 border">
-            <chat/>
+  <div class='row ml-0 pl-0 pr-0 mr-0 mt-0 container-fluid' id="app">
+    <div class="col-12">
+      <div class="row bg-dark pt-2 pb-2 pl-4">
+        <div class="col-12">
+          <div class="row ">
+            <h2 class='text-light '>CHAT APP</h2>
           </div>
         </div>
+      </div>
+    </div>
+    <div class="col-12" id="body">
+      <div class="row">
+        <div class="col-12 pl-5 pb-5" v-show='routerTo.login' v-if='!status'>
+          <div class="d-flex justify-content-center">
+            <chatLogIn/>
+          </div>
+        </div>
+        <div class="col-12 pl-5 pb-5" v-show='routerTo.register' v-if='!status'>
+          <div class="d-flex justify-content-center">
+            <chatRegistration/>
+          </div>
+        </div>
+
+        <div class="col-12  pl-1" v-if='status'>
+            <div class="row">
+              <div class="col-4 border">
+                <chatMenue/>
+              </div>
+              <div class="col-8 border">
+                <chat/>
+              </div>
+            </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -66,9 +84,9 @@ export default {
             this.$store.state.user.uid = user.uid
             this.$store.state.user.email = user.email
         }
-        fb.firestore().collection('users').doc(this.user.uid).get().then((doc)=>{
+        fb.firestore().collection('users').doc(this.$store.state.user.uid).get().then((doc)=>{
           this.$store.state.user.name = doc.data().name
-          this.$store.state.user.name = doc.data().phoneNumber
+          this.$store.state.user.phoneNumber = doc.data().phoneNumber
         })
     })
 
@@ -77,8 +95,19 @@ export default {
 
   },
   computed:{
-
+    routerTo(){
+      return this.$store.getters.routerTo
+    }
   },
 
 }
 </script>
+<style scoped>
+    #body {
+      background-image: url('./assets/photo/bdp.jpg');
+      background-position: center; /* Center the image */
+      background-repeat: no-repeat; /* Do not repeat the image */
+      background-size: cover;
+
+    }
+</style>

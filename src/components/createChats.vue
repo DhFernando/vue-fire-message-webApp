@@ -3,23 +3,28 @@
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+          <h5 class="modal-title" id="exampleModalLabel">create your {{newChat.type}}</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
         <div class="modal-body ml-4" >
           <div class="row" v-if='newChat.type=="group"'>
-              <input type="text" v-model='newChat.name' placeholder='New Chat Group Name'>
+              <input type="text" class='form-control ml-5 mr-5' v-model='newChat.name' placeholder='New Chat Group Name'>
           </div>
           <div class="row" v-if='newChat.type=="request"'>
-              <input type="text" v-model='newChat.name' placeholder='user Id'>
+              <input type="text" class='form-control ml-5 mr-5' v-model='newChat.name' placeholder='user Id'>
           </div>
           <div class="row mt-2">
-            <span class='mr-2'>create : </span>  <select class="" v-model='newChat.type'>
-              <option >group</option>
-              <option >request</option>
-            </select>
+            <div class="col-3 mr-0">
+              <h6 class=" ml-0 mr-0" >create :</h6>
+            </div>
+            <div class="col-9 ml-0">
+              <select class="form-control ml-0 mr-5" v-model='newChat.type'>
+                <option >group</option>
+                <option >request</option>
+              </select>
+            </div>
           </div>
         </div>
         <div class="modal-footer">
