@@ -4,7 +4,7 @@
       <div class="col-12">
         <div class="row">
           <div class="col-4 text-light ">
-            <h5>Chat Menue</h5>
+            <h6>Chat Menue</h6>
           </div>
           <div class="col-8">
             <div class="row">

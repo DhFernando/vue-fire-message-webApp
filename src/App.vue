@@ -24,10 +24,10 @@
 
         <div class="col-12  pl-1" v-if='status'>
             <div class="row">
-              <div class="col-4 border">
+              <div class="col-3 border">
                 <chatMenue/>
               </div>
-              <div class="col-8 border">
+              <div class="col-9 border">
                 <chat/>
               </div>
             </div>

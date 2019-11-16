@@ -20,7 +20,15 @@ export const store = new Vuex.Store({
        routerTo:{
               login:true,
               register:false
-            }
+            },
+      reply:{
+        baseMessage:'',
+        baseMessageId:'',
+        baseMessageOwner:{
+          uid:'',
+          name:''
+        }
+      }
 
     },
     getters:{
@@ -38,6 +46,9 @@ export const store = new Vuex.Store({
       },
       routerTo:(state)=>{
         return state.routerTo
+      },
+      reply:(state)=>{
+        return state.reply
       }
 
     },
@@ -48,6 +59,14 @@ export const store = new Vuex.Store({
       chat:(state,chat)=>{   // from chatMenue.vue for find  which chat is seleced by user form chat list (personal/group)
         state.fbMessages=[] // clear previous chat message data (id,message and  ext ..)
         state.chat = chat // parse selected chat information to the vuex state (now vuex is updated)
+        state.reply={
+          baseMessage:'',
+          baseMessageId:'',
+          baseMessageOwner:{
+            uid:'',
+            name:''
+          }
+        }
       },
       fbMessages:(state)=>{  // push chat message data to vuex fbMessages array
           fb.firestore().collection('chats').doc(state.chat.id).collection('message').orderBy('time').onSnapshot(snapshot=>{
@@ -69,13 +88,37 @@ export const store = new Vuex.Store({
             messageIndex:index
         })
       },
+      reply:(state,{replyBaseMessage})=>{
+        state.reply = {
+          baseMessage : replyBaseMessage.details.message,
+          baseMessageId : replyBaseMessage.messageId,
+          baseMessageOwner : {
+            uid:replyBaseMessage.details.uid,
+            name:replyBaseMessage.details.name
+          }
+        }
+      },
+      closeReply:(state)=>{
+        state.reply.baseMessage = ''
+        state.reply.baseMessageId = ''
+      },
       send:(state,{currentChat,message})=>{ // send message details to firebase
         fb.firestore().collection("chats").doc(currentChat).collection('message').add({
             message:message,
+            reply:state.reply,
             time:new Date(),
             uid:state.user.uid,
             name:state.user.name,
             deleted:false
+        }).then(()=>{
+          state.reply={
+            baseMessage:'',
+            baseMessageId:'',
+            baseMessageOwner:{
+              uid:'',
+              name:''
+            }
+          }
         })
       },
       createGroup:(state,newChat)=>{
